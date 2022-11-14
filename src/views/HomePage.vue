@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import CampingSpotCard from '@/components/CampingSpotCard.vue';
 import { IAdvertisement, IAdvertisementsResponse } from '@/models/IAdvertisementResponse';
-import { directus } from '@/services/directus.service';
-import { IonButton, IonButtons, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, onIonViewDidEnter, RefresherCustomEvent } from '@ionic/vue';
+import {authService, directus} from '@/services/directus.service';
+import {IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonCardSubtitle, IonIcon,IonButton, IonButtons, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, onIonViewDidEnter, RefresherCustomEvent } from '@ionic/vue';
 import { ref } from 'vue';
+import {add, personOutline} from 'ionicons/icons';
+
 
 const advertisements = ref<IAdvertisement[]>([]);
+const currentUser = ref<object>();
+
 
 onIonViewDidEnter(() => {
   fetchCampingSpots();
+  getSignedInUser()
 })
 
 const refreshCampingSpotsView = async (event: RefresherCustomEvent) => {
   await fetchCampingSpots();
   event.target.complete();
+}
+
+const getSignedInUser = async() =>{
+  currentUser.value = await authService.currentUser()
+  console.log(currentUser)
 }
 
 const fetchCampingSpots = async () => {
@@ -42,6 +52,7 @@ const fetchCampingSpots = async () => {
     advertisements.value = [...response.data.images];
     console.log(advertisements.value);
   }
+
 }
 
 </script>
@@ -52,8 +63,18 @@ const fetchCampingSpots = async () => {
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-title>Baal 🏕</ion-title>
-        <ion-buttons slot="end">
-          <ion-button router-link="/new-spot">+</ion-button>
+        <ion-buttons v-if="currentUser" slot="end">
+          <ion-button router-link="/new-spot">
+            <ion-icon :icon="add"></ion-icon>
+          </ion-button>
+          <ion-button  class="remove-image-preview" color="danger" @click="removeImagePreview(image)">
+            <ion-icon  :icon="personOutline"></ion-icon>
+            <ion-card>
+
+              {{currentUser.first_name + " " + currentUser.last_name }}
+
+            </ion-card>
+          </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
@@ -70,3 +91,26 @@ const fetchCampingSpots = async () => {
     </ion-content>
   </ion-page>
 </template>
+
+<style scoped>
+ion-content {
+  --ion-background-color: black;
+
+  display: flex;
+}
+
+ion-header > *{
+  display: flex;
+  height: 10vh;
+
+}
+
+
+.location-button {
+  position: absolute;
+  right: 0;
+  z-index: 1;
+}
+
+
+</style>

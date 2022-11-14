@@ -36,7 +36,7 @@ const getUserLocation = async () => {
   newAddress.value = []
 
 
-  const location = await Geolocation.getCurrentPosition();
+  const location = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
 
   console.log('Current position:', location.coords.longitude + " " + location.coords.latitude);
 

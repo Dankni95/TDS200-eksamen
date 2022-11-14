@@ -25,8 +25,6 @@ export const authService = {
     return await directus.auth.logout();
   },
   async currentUser() {
-    return await directus.users.me.read({
-      fields: ["email", "first_name"],
-    });
+    return await directus.users.me.read();
   },
 };
