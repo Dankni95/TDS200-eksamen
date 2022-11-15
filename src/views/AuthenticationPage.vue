@@ -1,117 +1,167 @@
-<script setup lang="ts">
-import { authService } from '@/services/directus.service';
-import { IonButton, IonContent, IonInput, IonItem, IonLabel, IonList, IonListHeader, IonPage, IonToggle } from '@ionic/vue';
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+<script lang="ts" setup>
+import {authService} from '@/services/directus.service';
+import {
+  IonBackButton,
+  IonButton,
+  IonButtons,
+  IonContent,
+  IonHeader,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonList,
+  IonPage,
+  IonTitle,
+  IonToggle,
+  IonToolbar,
+  toastController
+} from '@ionic/vue';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
 
 const router = useRouter();
 
-/* State */
 
 // The user can toggle between login and register mode in the form to show/hide additional fields
 const inRegisterMode = ref(false);
 
 // Provides two-way data binding between Vue and the input fields in the form
 const userDetails = ref({
-    firstName: '',
-    email: '',
-    password: ''
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: ''
 });
 
 const login = async () => {
-    try {
-        await authService.login(userDetails.value.email, userDetails.value.password);
-        router.replace('/home');
+  try {
+    await authService.login(userDetails.value.email, userDetails.value.password);
+    await router.push({name: 'Home'})
 
-    } catch (error) {
-        console.error(error);
-    }
+  } catch (error) {
+
+    const errorToast = await toastController.create({
+      message: error?.message,
+      duration: 2500,
+      position: 'bottom',
+      color: 'danger'
+    });
+
+    await errorToast.present();
+    console.error(error);
+  }
 }
 
 const register = async () => {
-    try {
-        await authService.register(userDetails.value.firstName, userDetails.value.email, userDetails.value.password);
-        await login();
-        /* if (wasRegistered) {
-            await login();
-        } */
-    } catch (error) {
-        console.log(error);
-    }
+  try {
+    await authService.register(userDetails.value.firstName, userDetails.value.lastName, userDetails.value.email, userDetails.value.password);
+    await login();
+
+    const successToast = await toastController.create({
+      message: 'Annonsen ble publisert!',
+      duration: 1500,
+      position: 'bottom',
+      color: 'success'
+    });
+
+    await successToast.present();
+  } catch (error) {
+    const errorToast = await toastController.create({
+      message: error?.message,
+      duration: 2500,
+      position: 'bottom',
+      color: 'danger'
+    });
+
+    await errorToast.present();
+    console.error(error);
+  }
 }
 
 </script>
-    
+
 <template>
-    <ion-page>
-        <ion-content>
-            <ion-list>
-                <ion-list-header>
-                    <ion-label>Baal</ion-label>
-                </ion-list-header>
 
-                <img class="hero-image" src="/assets/camera.png" />
-
-                <ion-item lines="none">
-                    <ion-label class="label-mild">Ny bruker?</ion-label>
-                    <ion-toggle color="dark" @ion-change="inRegisterMode = !inRegisterMode"></ion-toggle>
-                </ion-item>
-
-                <hr />
+  <ion-page>
+    <ion-header :translucent="true">
+      <ion-toolbar>
+        <ion-buttons slot="start">
+          <ion-back-button default-href="/home"></ion-back-button>
+        </ion-buttons>
+        <ion-title>Log in or register</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-list>
 
 
-                <ion-item v-if="inRegisterMode">
-                    <ion-label class="label-mild" position="floating">Fornavn</ion-label>
-                    <ion-input v-model="userDetails.firstName"></ion-input>
-                </ion-item>
+        <ion-item lines="none">
+          <ion-label class="label-mild">Create account?</ion-label>
+          <ion-toggle color="dark" @ion-change="inRegisterMode = !inRegisterMode"></ion-toggle>
+        </ion-item>
 
-                <ion-item>
-                    <ion-label class="label-mild" position="floating">Email</ion-label>
-                    <ion-input type="email" v-model="userDetails.email"></ion-input>
-                </ion-item>
+        <hr/>
 
-                <ion-item>
-                    <ion-label class="label-mild" position="floating">Passord</ion-label>
-                    <ion-input type="password" v-model="userDetails.password"></ion-input>
-                </ion-item>
 
-                <ion-button v-if="inRegisterMode" @click="register" class="button-auth" fill="solid" color="dark" size="default">
-                    Registrer deg 🏕
-                </ion-button>
+        <ion-item v-if="inRegisterMode">
+          <ion-label class="label-mild" position="floating">First name</ion-label>
+          <ion-input v-model="userDetails.firstName"></ion-input>
+        </ion-item>
 
-                <ion-button v-else @click="login" class="button-auth" fill="solid" color="dark" size="default">
-                    Logg inn 🏕
-                </ion-button>
+        <ion-item v-if="inRegisterMode">
+          <ion-label class="label-mild" position="floating">Last name</ion-label>
+          <ion-input v-model="userDetails.lastName"></ion-input>
+        </ion-item>
 
-            </ion-list>
+        <ion-item>
+          <ion-label class="label-mild" position="floating">Email</ion-label>
+          <ion-input v-model="userDetails.email" type="email"></ion-input>
+        </ion-item>
 
-        </ion-content>
-    </ion-page>
+        <ion-item>
+          <ion-label class="label-mild" position="floating">Password</ion-label>
+          <ion-input v-model="userDetails.password" type="password"></ion-input>
+        </ion-item>
+
+        <ion-button v-if="inRegisterMode" class="button-auth" color="dark" fill="solid" size="default"
+                    @click="register">
+          Create account
+        </ion-button>
+
+        <ion-button v-else class="button-auth" color="dark" fill="solid" size="default" @click="login">
+          Log in
+        </ion-button>
+
+      </ion-list>
+
+    </ion-content>
+  </ion-page>
 </template>
-    
+
 <style scoped>
 ion-content {
-    --ion-background-color: #f4f4f4;
-    display: flex;
+  --ion-background-color: #f4f4f4;
+  display: flex;
 }
 
 ion-list {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
 }
 
 .label-mild {
-    --color: #8a8a8a !important;
+  --color: #8a8a8a !important;
 }
 
 .hero-image {
-    width: 80vw;
-    align-self: center;
+  width: 80vw;
+  align-self: center;
 }
 
 .button-auth {
-    margin-top: 50px;
-    margin-left: 10px;
-    margin-right: 10px;
+  margin-top: 50px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 </style>

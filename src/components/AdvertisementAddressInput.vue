@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 
-import {IonButton, IonContent, IonIcon, IonLabel, IonList, IonSearchbar} from "@ionic/vue";
+import {IonButton, IonButtons, IonIcon, IonLabel, IonSearchbar, IonSpinner} from "@ionic/vue";
 import {navigateCircle} from 'ionicons/icons';
 import {ref, toRaw} from "vue";
 import {Geolocation} from "@capacitor/geolocation";
 
- interface ICreateMap{
+const isGettingLocation = ref(false);
+
+
+interface ICreateMap {
   lon: number;
   lat: number;
   formatted: string;
@@ -20,8 +23,6 @@ const emit = defineEmits<{
 }>()
 
 
-//find how to return value to parent from this prop
-
 const newAddress = ref(addresses);
 const coordinates = ref(coords);
 
@@ -32,11 +33,13 @@ const selectedAddress = ref("");
 
 const getUserLocation = async () => {
 
+  isGettingLocation.value = true
+
   selectedAddress.value = ""
   newAddress.value = []
 
 
-  const location = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+  const location = await Geolocation.getCurrentPosition({enableHighAccuracy: true});
 
   console.log('Current position:', location.coords.longitude + " " + location.coords.latitude);
 
@@ -59,15 +62,15 @@ const getUserLocation = async () => {
 }
 
 const searchForAddress = async (event: any) => {
+  isGettingLocation.value = true
   selectedAddress.value = ""
 
   const response = await fetch(`  https://api.geoapify.com/v1/geocode/autocomplete?text=${event.detail.value}&format=json&apiKey=9fa2f9495b1a45bd8735bdd259500594`);
   const data = await response.json();
-
   coordinates.value = data.results
-
-
   const addresses = [...data.results]
+
+  isGettingLocation.value = false
 
   newAddress.value = addresses.map((address) => {
     return address.formatted
@@ -76,6 +79,7 @@ const searchForAddress = async (event: any) => {
 
 
 const returnAddress = (address: string) => {
+  isGettingLocation.value = false
   selectedAddress.value = address
 
   let coordsResult = coordinates.value.filter(obj => {
@@ -90,62 +94,40 @@ const returnAddress = (address: string) => {
 }
 
 
-interface Props {
-  advertisement: {
-    id: number;
-    title: string;
-    platform: string[];
-    description: string;
-    condition: string;
-    maps: string;
-    image: {
-      id: string;
-    };
-    user_created: {
-      first_name: string;
-    };
-  }
-}
-
-//defineProps<Props>();
-
-
 </script>
 
 <template>
-  <ion-content>
-    <section>
-      <ion-searchbar color="success" debounce="500" type="text" @ionChange="searchForAddress($event)">
-        <ion-button class="location-button" color="danger" @click="getUserLocation">
-          <ion-icon :icon="navigateCircle"></ion-icon>
+  <section>
+    <ion-searchbar color="success" debounce="500" type="text" @ionChange="searchForAddress($event)">
+      <ion-button class="location-button" color="danger" @click="getUserLocation">
+        <ion-icon :icon="navigateCircle"></ion-icon>
+      </ion-button>
+    </ion-searchbar>
+    <ion-spinner v-if="isGettingLocation" name="dots"></ion-spinner>
+
+    <div v-if="newAddress">
+      <ion-buttons v-for="item in newAddress" :key="item" :model-value="item">
+        <ion-button @click="returnAddress(item)">
+          <ion-label class="address" text-wrap>{{ item }}</ion-label>
         </ion-button>
-      </ion-searchbar>
+      </ion-buttons>
+    </div>
 
 
-      <ion-list v-for="item in newAddress" :key="item" :slot="center" :model-value="item">
-        <ion-item @click="returnAddress(item)">{{ item }}</ion-item>
-      </ion-list>
-
-
-      <ion-item lines="none">
-        <ion-label v-if="selectedAddress" :key="searchForAddress"
-                   :model-value="selectedAddress" text-wrap>Your address: {{ selectedAddress }}
-        </ion-label>
-      </ion-item>
-    </section>
-  </ion-content>
+    <ion-item lines="none">
+      <ion-label v-if="selectedAddress" :key="searchForAddress"
+                 :model-value="selectedAddress" text-wrap>Your address: {{ selectedAddress }}
+      </ion-label>
+    </ion-item>
+  </section>
 </template>
 
 <style scoped>
-ion-content, ion-searchbar {
-  --ion-background-color: black;
 
-  display: flex;
-}
 
-ion-list {
-  display: flex;
-  flex-direction: column;
+.address, ion-buttons {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 

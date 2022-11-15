@@ -29,7 +29,7 @@ import {
   toastController
 } from '@ionic/vue';
 import {add, closeCircleOutline} from 'ionicons/icons';
-import {ref} from 'vue';
+import {ref, toRaw} from 'vue';
 import AdvertisementAddressInput from '@/components/AdvertisementAddressInput.vue'
 
 
@@ -51,22 +51,17 @@ const newAdvertisement = ref<INewAdvertisement>({
 });
 
 // Add whatever is in the hashtag input field to the camp spot's array of hashtags
-const addNewHashtag = () => {
+const addNewPlatformType = () => {
   // Avoid adding empty hashtags
   if (newPlatformTag.value) {
     newAdvertisement.value.platform.push(newPlatformTag.value);
     newPlatformTag.value = "";
   }
-
-  // TODO Logic to avoid duplicate hashtags
 }
 
 // Handle data POSTing
 const postNewCampSpot = async () => {
-  if (!newAdvertisement.value.images) {
-    alert("Du må laste opp bilde");
-    return;
-  }
+
 
   const imageIds: any[] = []
 
@@ -80,11 +75,8 @@ const postNewCampSpot = async () => {
       const response = await fetch(image);
       const imageBlob = await response.blob();
 
-
       formData.append('file', imageBlob);
-
       const images = await directus.files.createOne(formData)
-
       imageIds.push(images)
     }
 
@@ -107,7 +99,6 @@ const postNewCampSpot = async () => {
     }
 
 
-
     if (imageIds) {
       await directus.items('images').createOne({
         title: newAdvertisement.value.title,
@@ -123,7 +114,7 @@ const postNewCampSpot = async () => {
       });
 
       const successToast = await toastController.create({
-        message: 'Annonsen ble publisert!',
+        message: 'Advertisement is now published!',
         duration: 1500,
         position: 'bottom',
         color: 'success'
@@ -136,7 +127,7 @@ const postNewCampSpot = async () => {
 
   } catch (error) {
     const errorToast = await toastController.create({
-      message: 'Noe gikk galt ved opplasting av annonsen!',
+      message: 'Something went wrong!',
       duration: 2500,
       position: 'bottom',
       color: 'danger'
@@ -193,6 +184,7 @@ const conditionSelect = (selectValue: string) => {
 }
 
 
+
 </script>
 
 <template>
@@ -200,9 +192,9 @@ const conditionSelect = (selectValue: string) => {
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Legg til ny 🏕-plass</ion-title>
+        <ion-title>Publish your advertisement!</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -212,7 +204,7 @@ const conditionSelect = (selectValue: string) => {
 
         <!-- Logic for file picking / using camera will be added later -->
         <ion-button class="image-picker" color="light" @click="triggerCamera">
-          Velg fil eller ta bilde 📸
+          Add an image
         </ion-button>
 
 
@@ -231,7 +223,7 @@ const conditionSelect = (selectValue: string) => {
         </section>
 
         <ion-item>
-          <ion-label class="label-mild" position="floating">Tittel</ion-label>
+          <ion-label class="label-mild" position="floating">Title</ion-label>
           <ion-input v-model="newAdvertisement.title" type="text"></ion-input>
         </ion-item>
 
@@ -242,7 +234,7 @@ const conditionSelect = (selectValue: string) => {
         </ion-item>
 
         <ion-item>
-          <ion-label class="label-mild" position="floating">Beskrivelse</ion-label>
+          <ion-label class="label-mild" position="floating">Description</ion-label>
           <ion-textarea v-model="newAdvertisement.description" class="description"></ion-textarea>
         </ion-item>
 
@@ -250,19 +242,15 @@ const conditionSelect = (selectValue: string) => {
           <ion-label class="label-mild" position="floating">Platform type</ion-label>
           <ion-input v-model="newPlatformTag" type="text"></ion-input>
 
-          <ion-button slot="end" color="dark" size="default" @click="addNewHashtag">
+          <ion-button slot="end" color="dark" size="default" @click="addNewPlatformType">
             <ion-icon :icon="add"></ion-icon>
           </ion-button>
         </ion-item>
 
         <ion-item lines="none">
-          <ion-chip v-for="tag in newAdvertisement.platform" :key="tag" color="primary">{{ tag }}</ion-chip>
+          <ion-chip v-for="platform in newAdvertisement.platform" :key="platform" color="primary">{{ platform }}</ion-chip>
         </ion-item>
 
-
-      </ion-list>
-
-      <ion-list>
         <ion-item>
           <ion-label class="label-mild" position="floating">Item condition</ion-label>
 
@@ -276,19 +264,18 @@ const conditionSelect = (selectValue: string) => {
             <ion-select-option value="broken or for parts">Broken or for parts</ion-select-option>
           </ion-select>
         </ion-item>
+
+
+        <advertisement-address-input @my-event="getAddressFromChild"/>
+
+
+        <ion-button  :disabled="isUploadingAdvertisement" class="button-add" color="dark" fill="solid"
+                    size="default" @click="postNewCampSpot">
+          <ion-spinner v-if="isUploadingAdvertisement" name="dots"></ion-spinner>
+          <span v-else>Publish advertisement 🏕</span>
+        </ion-button>
+
       </ion-list>
-      <div class="ion-padding ">
-        <p v-if="newAdvertisement.condition"> {{ newAdvertisement.condition }} </p>
-      </div>
-
-      <advertisement-address-input @my-event="getAddressFromChild"/>
-
-
-      <ion-button :disabled="isUploadingAdvertisement" class="button-add" color="dark" fill="solid"
-                  size="default" @click="postNewCampSpot">
-        <ion-spinner v-if="isUploadingAdvertisement" name="dots"></ion-spinner>
-        <span v-else>Send inn 🏕</span>
-      </ion-button>
 
     </ion-content>
   </ion-page>
@@ -296,7 +283,7 @@ const conditionSelect = (selectValue: string) => {
 
 <style scoped>
 ion-content {
-  --ion-background-color: #f4f4f4;
+  background-color: #f4f4f4;
   display: flex;
 }
 

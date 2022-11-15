@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from "@ionic/vue-router";
 import { RouteRecordRaw } from "vue-router";
 import HomePage from "../views/HomePage.vue";
-import DetailPage from "@/views/DetailPage.vue";
+import UserProfile from "../views/AdvertisementUserProfile.vue";
+import DetailPage from "@/views/SingleAdvertisementPage.vue";
 import AuthenticationPage from "@/views/AuthenticationPage.vue";
-import NewCampSpotPage from "@/views/NewCampSpotPage.vue";
+import NewAdvertisement from "@/views/NewAdvertisementPage.vue";
 import { authService } from "@/services/directus.service";
 import { toastController } from "@ionic/vue";
 
-const authenticationREquredRouteGuard = async () => {
+const authenticationRequiredRouteGuard = async () => {
   const userAccessToken = localStorage.getItem("auth_token");
 
   if (!userAccessToken) {
@@ -19,7 +20,7 @@ const authenticationREquredRouteGuard = async () => {
   if (userAccessTokenExpiresAt < new Date().getTime()) {
 
     const errorToast = await toastController.create({
-      message: "Brukersesjon er utløpt – logg inn på nytt",
+      message: "Your session is expired",
       duration: 3000,
       color: "warning"
     });
@@ -44,15 +45,21 @@ const routes: Array<RouteRecordRaw> = [
     component: HomePage,
   },
   {
+    path: "/profile",
+    name: "Profile",
+    component: UserProfile,
+    beforeEnter: [authenticationRequiredRouteGuard]
+  },
+  {
     path: "/authentication",
     name: "Login",
     component: AuthenticationPage,
   },
   {
-    path: "/new-spot",
-    name: "NewCampSpot",
-    component: NewCampSpotPage,
-    beforeEnter: [authenticationREquredRouteGuard]
+    path: "/new-advertisement",
+    name: "NewAdvertisement",
+    component: NewAdvertisement,
+    beforeEnter: [authenticationRequiredRouteGuard]
   },
   {
     path: "/detail/:id",

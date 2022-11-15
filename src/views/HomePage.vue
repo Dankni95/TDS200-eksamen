@@ -1,29 +1,49 @@
-<script setup lang="ts">
-import CampingSpotCard from '@/components/CampingSpotCard.vue';
-import { IAdvertisement, IAdvertisementsResponse } from '@/models/IAdvertisementResponse';
+<script lang="ts" setup>
+import Advertisement from '@/components/AdbertisementCard.vue';
+import {IAdvertisement, IAdvertisementsResponse} from '@/models/IAdvertisementResponse';
 import {authService, directus} from '@/services/directus.service';
-import {IonCard, IonCardTitle, IonCardHeader, IonCardContent, IonCardSubtitle, IonIcon,IonButton, IonButtons, IonContent, IonHeader, IonPage, IonRefresher, IonRefresherContent, IonTitle, IonToolbar, onIonViewDidEnter, RefresherCustomEvent } from '@ionic/vue';
-import { ref } from 'vue';
-import {add, personOutline} from 'ionicons/icons';
+import {
+  IonButton,
+  IonButtons,
+  IonCard,
+  IonContent,
+  IonHeader,
+  IonIcon,
+  IonPage,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
+  IonTitle,
+  IonToolbar,
+    IonLabel,
+  onIonViewDidEnter,
+  RefresherCustomEvent
+} from '@ionic/vue';
+import {ref} from 'vue';
+import {add, logIn, personOutline} from 'ionicons/icons';
 
 
 const advertisements = ref<IAdvertisement[]>([]);
-const currentUser = ref<object>();
+const currentUser = ref<any>();
+const isLoading = ref(true);
+const userAccessToken = ref()
 
 
 onIonViewDidEnter(() => {
+   userAccessToken.value = localStorage.getItem('auth_token');
+    if (userAccessToken.value) getSignedInUser()
+
   fetchCampingSpots();
-  getSignedInUser()
 })
+
 
 const refreshCampingSpotsView = async (event: RefresherCustomEvent) => {
   await fetchCampingSpots();
   event.target.complete();
 }
 
-const getSignedInUser = async() =>{
-  currentUser.value = await authService.currentUser()
-  console.log(currentUser)
+const getSignedInUser = async () => {
+  currentUser.value = await authService?.currentUser()
 }
 
 const fetchCampingSpots = async () => {
@@ -38,6 +58,7 @@ const fetchCampingSpots = async () => {
         price
         condition
         date_created
+        address
         images {
           directus_files_id{
             id
@@ -48,68 +69,76 @@ const fetchCampingSpots = async () => {
 
   `);
 
+
   if (response.status === 200 && response.data) {
     advertisements.value = [...response.data.images];
-    console.log(advertisements.value);
+    isLoading.value = false
   }
 
 }
 
 </script>
-  
+
 
 <template>
-  <ion-page>
-    <ion-header :translucent="true">
+  <ion-page :style="{backgroundImage:'url(assets/images/bg-1.jpg)'}"  >
+    <ion-header v-if="!isLoading" :translucent="true">
       <ion-toolbar>
-        <ion-title>Baal 🏕</ion-title>
-        <ion-buttons v-if="currentUser" slot="end">
-          <ion-button router-link="/new-spot">
-            <ion-icon :icon="add"></ion-icon>
+        <ion-title>
+          <ion-title v-if="!isLoading"><ion-label text-wrap>Retro Games</ion-label></ion-title>
+          <ion-spinner v-if="isLoading"/>
+        </ion-title>
+
+        <ion-buttons v-if="!userAccessToken" slot="end" router-link="/authentication">
+          <ion-button router-link="/new-advertisement">
+            <ion-icon :icon="logIn"></ion-icon>
+            <ion-label text-wrap>Log in</ion-label>
           </ion-button>
-          <ion-button  class="remove-image-preview" color="danger" @click="removeImagePreview(image)">
-            <ion-icon  :icon="personOutline"></ion-icon>
+        </ion-buttons>
+        <ion-buttons v-if="userAccessToken" slot="end">
+          <ion-button router-link="/new-advertisement">
+            <ion-icon :icon="add"></ion-icon>
+            <ion-label text-wrap>Publish add</ion-label>
+          </ion-button>
+          <ion-button class="remove-image-preview" color="danger" router-link="/profile">
+            <ion-icon :icon="personOutline"></ion-icon>
             <ion-card>
-
-              {{currentUser.first_name + " " + currentUser.last_name }}
-
+              <ion-label v-if="currentUser" text-wrap>
+                {{ currentUser.first_name }}
+              </ion-label>
             </ion-card>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
+    <ion-content v-if="!isLoading" :fullscreen="true">
 
       <ion-refresher slot="fixed" @ionRefresh="refreshCampingSpotsView($event)">
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-      <camping-spot-card v-for="advertisement in advertisements" :key="advertisement.id" :advertisement="advertisement" />
 
-
+      <advertisement v-for="advertisement in advertisements" :key="advertisement.id"
+                         :advertisement="advertisement"/>
     </ion-content>
   </ion-page>
 </template>
 
 <style scoped>
 ion-content {
-  --ion-background-color: black;
-
+  --ion-background-color: transparent;
   display: flex;
 }
 
-ion-header > *{
+ion-toolbar > ion-title{
+  padding: 10px;
+}
+
+ion-header > * {
   display: flex;
   height: 10vh;
 
-}
-
-
-.location-button {
-  position: absolute;
-  right: 0;
-  z-index: 1;
 }
 
 

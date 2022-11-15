@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 
-import CampingSpotImage from "@/components/CampingSpotImage.vue";
+import AdvertisementImage from "@/components/AdvertisementImage.vue";
 import {IAdvertisement, IAdvertisementResponse} from "@/models/IAdvertisementResponse";
 import {directus} from "@/services/directus.service";
 import {
@@ -11,19 +11,16 @@ import {
   IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
+  IonCardTitle,
   IonCol,
   IonContent,
   IonHeader,
   IonIcon,
-  IonItem,
   IonLabel,
   IonList,
-  IonListHeader,
-  IonModal,
   IonPage,
   IonRow,
   IonSpinner,
-  IonTextarea,
   IonTitle,
   IonToolbar,
   onIonViewDidEnter
@@ -45,7 +42,6 @@ const {id} = route.params;
 
 /* State */
 const isModalOpen = ref(false);
-const newCommentText = ref('');
 const isLoadingAdvertisement = ref(true);
 
 /* "Dummy data" for displaying in the UI until we connect the app to an API */
@@ -56,7 +52,7 @@ onIonViewDidEnter(() => {
 })
 
 
-/* Fetch data for the specified camping spot from Directus by ID. Cancel the loading spinner when the data has been fetched successfully. */
+/* Fetch data for the specified advertisement from Directus by ID. Cancel the loading spinner when the data has been fetched successfully. */
 const fetchCampingSpot = async () => {
   const response = await directus.graphql.items<IAdvertisementResponse>(`
     query {
@@ -115,7 +111,7 @@ const addNewComment = () => {
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button default-href="/"></ion-back-button>
+          <ion-back-button default-href="/home"></ion-back-button>
         </ion-buttons>
         <ion-title v-if="isLoadingAdvertisement">
           <ion-spinner></ion-spinner>
@@ -129,85 +125,55 @@ const addNewComment = () => {
       </ion-toolbar>
     </ion-header>
 
-    <ion-content v-if="advertisement && !isLoadingAdvertisement" :fullscreen="true">
+    <ion-content v-if="advertisement && !isLoadingAdvertisement"
+                 :fullscreen="true" :style="{backgroundImage:'url(assets/images/bg-2.jpg)'}">
 
-
-      <!-- Hero image section -->
-
-
-      <section>
-        <ion-grid>
-          <ion-row>
-            <ion-col v-for="images in advertisement.images" :key="images.id" color="tertiary" size="6" size-lg="2"
-                     size-md="5">
-              <camping-spot-image :image-id="images.directus_files_id.id"/>
-            </ion-col>
-          </ion-row>
-        </ion-grid>
-      </section>
 
       <!--<ion-chip v-for="condition in advertisement.condition" :key="condition" color="tertiary">#{{ condition }}</ion-chip> -->
 
       <!-- Camping spot info section -->
       <ion-card>
-        <ion-card-header>
-          <ion-card-subtitle>Turbeskrivelse</ion-card-subtitle>
+        <ion-card-title style="text-align: center; padding: 50px">
+          <h2>{{ advertisement.title }}</h2>
+        </ion-card-title>
+        <section>
+          <ion-grid>
+            <ion-row>
+              <ion-col v-for="images in advertisement.images" :key="images.id" color="tertiary" size="6" size-lg="2"
+                       size-md="5">
+                <advertisement-image :image-id="images.directus_files_id.id"/>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </section>
+        <ion-card-header style="color: #52ffe4">
+          Price: {{ advertisement.price }}
+          <br>
+          <h4 style="color: white">Description</h4>
+          <ion-card-subtitle>
+            {{ advertisement.description }}
+          </ion-card-subtitle>
         </ion-card-header>
         <ion-card-content>
-          {{ advertisement.description }}
+
+          <h4 style="color: white">Address </h4>
+          <ion-label>
+            {{ advertisement.address }}
+          </ion-label>
+          <br>
+          <MapboxMap
+              :center="[10.775847, 59.926306]"
+              :zoom="10"
+              access-token="pk.eyJ1IjoiZGFua25pOTUiLCJhIjoiY2t3cmE0OXlsMGQ3bzMxbHNjMm82bDkzeCJ9.1XATyS82VYWyaSB5NQ3j9g"
+              map-style="mapbox://styles/mapbox/streets-v11"
+              style="height: 300px"
+              @mb-created="(mapboxInstance) => map = mapboxInstance">
+            <MapboxMarker :lng-lat="advertisement.map.coordinates"/>
+          </MapboxMap>
+
         </ion-card-content>
       </ion-card>
 
-      <ion-label>
-        {{advertisement.address}}
-      </ion-label>
-      <MapboxMap
-          :center="[10.775847, 59.926306]"
-          :zoom="10"
-          access-token="pk.eyJ1IjoiZGFua25pOTUiLCJhIjoiY2t3cmE0OXlsMGQ3bzMxbHNjMm82bDkzeCJ9.1XATyS82VYWyaSB5NQ3j9g"
-          map-style="mapbox://styles/mapbox/streets-v11"
-          style="height: 200px"
-          @mb-created="(mapboxInstance) => map = mapboxInstance">
-        <MapboxMarker :lng-lat="advertisement.map.coordinates"/>
-      </MapboxMap>
-
-      <!-- Comment section -->
-      <ion-card>
-        <ion-list>
-          <ion-list-header>
-            <ion-label>
-              Kommentarfelt
-              <ion-icon :icon="chatboxOutline"></ion-icon>
-            </ion-label>
-          </ion-list-header>
-          <!-- <ion-item v-for="comment in campingSpot.comments" :key="comment.id" lines="none">
-            <ion-avatar slot="start">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAAAAACH5BAAAAAAALAAAAAABAAEAAAICTAEAOw==">
-            </ion-avatar>
-            <ion-label class="ion-text-wrap">
-              <ion-text>
-                <b>{{comment.username}} </b>
-              </ion-text>
-              <ion-text>
-                <p>{{comment.text}}</p>
-              </ion-text>
-            </ion-label>
-          </ion-item> -->
-
-
-        </ion-list>
-      </ion-card>
-
-      <ion-modal :breakpoints="[0, 0.25, 0.5, 0.75]" :initial-breakpoint="0.25" :is-open="isModalOpen"
-                 @did-dismiss="isModalOpen = false">
-        <ion-content>
-          <ion-item lines="none">
-            <ion-label position="floating">Ny kommentar</ion-label>
-            <ion-textarea v-model="newCommentText"></ion-textarea>
-            <ion-button @click="addNewComment">Legg til kommentar</ion-button>
-          </ion-item>
-        </ion-content>
-      </ion-modal>
     </ion-content>
   </ion-page>
 </template>
@@ -215,7 +181,7 @@ const addNewComment = () => {
 
 <style scoped>
 ion-content {
-  --ion-background-color: black;
+  --ion-background-color: transparent;
   display: flex;
 }
 
@@ -224,28 +190,9 @@ ion-list {
   flex-direction: column;
 }
 
-.label-mild {
-  --color: #8a8a8a !important;
-}
-
-.image-picker {
-  height: 10vh;
-  margin: 10px;
-  border: 2px #8a8a8a dashed;
-  border-radius: 8px;
-  font-size: medium;
-}
-
-.remove-image-preview {
-  position: absolute;
-  right: 0;
-  z-index: 1;
+ion-card {
+  opacity: 0.9;
 }
 
 
-.button-add {
-  margin-top: 50px;
-  margin-left: 10px;
-  margin-right: 10px;
-}
 </style>

@@ -11,9 +11,10 @@ export const authService = {
   async login(email: string, password: string) {
     return await directus.auth.login({ email, password });
   },
-  async register(firstName: string, email: string, password: string): Promise<boolean> {
+  async register(firstName: string, lastName: string,  email: string, password: string): Promise<boolean> {
     const createUserResult = await directus.users.createOne({
       first_name: firstName,
+      last_name: lastName,
       email,
       password,
       role: "8cd7bf01-a84c-4440-91db-e9fadd6bdc76"

@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'Baal_2022_forelesning_1',
+  appName: 'TDS200 Exam',
   webDir: 'dist',
   bundledWebRuntime: false
 };
