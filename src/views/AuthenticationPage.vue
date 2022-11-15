@@ -8,14 +8,14 @@ import {
   IonHeader,
   IonInput,
   IonItem,
+  IonItemDivider,
   IonLabel,
   IonList,
   IonPage,
   IonTitle,
   IonToggle,
   IonToolbar,
-  toastController,
-    IonItemDivider
+  toastController
 } from '@ionic/vue';
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
@@ -83,9 +83,9 @@ const register = async () => {
 
 <template>
 
-  <ion-page >
+  <ion-page>
     <ion-header :translucent="true">
-      <ion-toolbar >
+      <ion-toolbar>
         <ion-buttons slot="start">
           <ion-back-button default-href="/home"></ion-back-button>
         </ion-buttons>
@@ -141,7 +141,7 @@ const register = async () => {
 </template>
 
 <style scoped>
-ion-content{
+ion-content {
   display: flex;
 }
 

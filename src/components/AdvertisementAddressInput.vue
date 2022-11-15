@@ -96,7 +96,8 @@ const returnAddress = (address: string) => {
 
 <template>
   <section>
-    <ion-searchbar color="success" debounce="700" type="text" v-model="selectedAddress" @ionChange="searchForAddress($event)">
+    <ion-searchbar v-model="selectedAddress" color="success" debounce="700" type="text"
+                   @ionChange="searchForAddress($event)">
       <ion-button class="location-button" color="danger" @click="getUserLocation">
         <ion-icon :icon="navigateCircle"></ion-icon>
       </ion-button>

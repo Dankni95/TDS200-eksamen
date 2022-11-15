@@ -213,7 +213,7 @@ const conditionSelect = (selectValue: string) => {
                 <ion-button class="remove-image-preview" color="danger" @click="removeImagePreview(image)">
                   <ion-icon :icon="closeCircleOutline"></ion-icon>
                 </ion-button>
-                <img :src="image"/>
+                <img :src="image" alt="image"/>
               </ion-col>
             </ion-row>
           </ion-grid>

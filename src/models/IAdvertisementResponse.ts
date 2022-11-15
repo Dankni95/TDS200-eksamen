@@ -3,13 +3,25 @@ export interface IAdvertisement {
     title: string;
     platform: string[];
     description: string;
+    price: number;
     condition: string;
     maps: INewMapPoint;
-    date_created: string
+    address: string;
+    date_created: string;
+    user_created: {
+        id: number;
+        first_name: string;
+        last_name: string;
+        email: string;
+    }
     images: {
+        directus_files_id: {
+            id: string;
+        };
         id: string;
     };
 }
+
 
 export interface IAdvertisementResponse {
     images_by_id: IAdvertisement;
@@ -34,8 +46,8 @@ export interface INewMapPoint {
     lon: number;
     lat: number;
     formatted: string;
-    coordinates: [number, number],
-    type: string,
+    coordinates: [number, number];
+    type: string;
 }
 
 export interface ICurrentUser {

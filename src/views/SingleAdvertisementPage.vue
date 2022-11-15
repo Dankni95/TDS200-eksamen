@@ -33,6 +33,12 @@ import {
 const route = useRoute();
 const map = ref();
 
+interface ICreateMap {
+  lon: number;
+  lat: number;
+  formatted: string;
+}
+
 
 /* Retrieve the id parameter from the current route's query string (/detail/:id) */
 const {id} = route.params;
@@ -81,7 +87,6 @@ const fetchCampingSpot = async () => {
 
   if (response.status === 200 && response.data) {
     advertisement.value = response.data.images_by_id;
-    console.log(response.data.images_by_id)
     isLoadingAdvertisement.value = false;
 
     var isoDateString = new Date(advertisement.value.date_created);
@@ -112,11 +117,7 @@ const fetchCampingSpot = async () => {
     <ion-content v-if="advertisement && !isLoadingAdvertisement"
                  :fullscreen="true" :style="{backgroundImage:'url(assets/images/bg-2.jpg)'}">
 
-
-      <!--<ion-chip v-for="condition in advertisement.condition" :key="condition" color="tertiary">#{{ condition }}</ion-chip> -->
-
-      <!-- Camping spot info section -->
-      <ion-card>
+      <ion-card v-if="advertisement">
         <br>
         <ion-label style="text-align: center">
           <p style="text-align: center"> Created by {{ advertisement.user_created.first_name }}
@@ -181,14 +182,7 @@ ion-content {
   display: flex;
 }
 
-ion-list {
-  display: flex;
-  flex-direction: column;
-}
-
 ion-card {
   opacity: 0.9;
 }
-
-
 </style>

@@ -91,7 +91,7 @@ const fetchCampingSpots = async () => {
           <ion-spinner v-if="isLoading"/>
         </ion-title>
         <ion-buttons v-if="!userAccessToken" slot="end" router-link="/authentication">
-          <ion-button style="margin: 20px" router-link="/new-advertisement">
+          <ion-button router-link="/new-advertisement" style="margin: 20px">
             <ion-icon :icon="logIn"></ion-icon>
             <ion-label text-wrap>Login</ion-label>
           </ion-button>

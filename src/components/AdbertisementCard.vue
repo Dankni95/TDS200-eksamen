@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonLabel} from "@ionic/vue";
 import AdvertisementImage from "@/components/AdvertisementImage.vue";
+import {INewMapPoint} from "@/models/IAdvertisementResponse";
 
 
 interface Props {
@@ -8,13 +9,19 @@ interface Props {
     id: number;
     title: string;
     platform: string[];
-    price: number
     description: string;
     condition: string;
-    address: string
-    images: {
-      directus_files_id: any
+    maps: INewMapPoint;
+    date_created: string
+    user_created: {
+      id: number
+      first_name: string
+      last_name: string
+      email: string
     }
+    images: {
+      id: string;
+    };
   }
 }
 

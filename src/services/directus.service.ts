@@ -27,7 +27,7 @@ export const authService = {
     async logout() {
         return await directus.auth.logout();
     },
-     async currentUser () {
+    async currentUser() {
         return await directus.users.me.read() as ICurrentUser;
     },
 };

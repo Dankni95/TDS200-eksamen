@@ -45,7 +45,7 @@ const getSignedInUser = async () => {
   userResponse.value = await authService.currentUser()
   isLoadingProfile.value = false
 }
-1
+
 const logout = async () => {
   await authService.logout()
 
