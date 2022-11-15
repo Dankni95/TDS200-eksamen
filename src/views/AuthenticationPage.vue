@@ -14,7 +14,8 @@ import {
   IonTitle,
   IonToggle,
   IonToolbar,
-  toastController
+  toastController,
+    IonItemDivider
 } from '@ionic/vue';
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
@@ -82,27 +83,24 @@ const register = async () => {
 
 <template>
 
-  <ion-page>
+  <ion-page >
     <ion-header :translucent="true">
-      <ion-toolbar>
+      <ion-toolbar >
         <ion-buttons slot="start">
           <ion-back-button default-href="/home"></ion-back-button>
         </ion-buttons>
-        <ion-title>Log in or register</ion-title>
+        <ion-title>Login or register</ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-list>
+      <ion-list :style="{backgroundImage:'url(assets/images/bg-2.jpg)'}">
 
 
         <ion-item lines="none">
           <ion-label class="label-mild">Create account?</ion-label>
           <ion-toggle color="dark" @ion-change="inRegisterMode = !inRegisterMode"></ion-toggle>
         </ion-item>
-
         <hr/>
-
-
         <ion-item v-if="inRegisterMode">
           <ion-label class="label-mild" position="floating">First name</ion-label>
           <ion-input v-model="userDetails.firstName"></ion-input>
@@ -113,23 +111,27 @@ const register = async () => {
           <ion-input v-model="userDetails.lastName"></ion-input>
         </ion-item>
 
+
         <ion-item>
           <ion-label class="label-mild" position="floating">Email</ion-label>
           <ion-input v-model="userDetails.email" type="email"></ion-input>
         </ion-item>
+
+        <ion-item-divider style="background-color: transparent"/>
+
 
         <ion-item>
           <ion-label class="label-mild" position="floating">Password</ion-label>
           <ion-input v-model="userDetails.password" type="password"></ion-input>
         </ion-item>
 
-        <ion-button v-if="inRegisterMode" class="button-auth" color="dark" fill="solid" size="default"
+        <ion-button v-if="inRegisterMode" class="button-auth" color="secondary" fill="solid" size="default"
                     @click="register">
           Create account
         </ion-button>
 
-        <ion-button v-else class="button-auth" color="dark" fill="solid" size="default" @click="login">
-          Log in
+        <ion-button v-else class="button-auth" color="secondary" fill="solid" size="default" @click="login">
+          Login
         </ion-button>
 
       </ion-list>
@@ -139,8 +141,7 @@ const register = async () => {
 </template>
 
 <style scoped>
-ion-content {
-  --ion-background-color: #f4f4f4;
+ion-content{
   display: flex;
 }
 
@@ -148,6 +149,8 @@ ion-list {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: transparent;
+
 }
 
 .label-mild {

@@ -63,7 +63,6 @@ const getUserLocation = async () => {
 
 const searchForAddress = async (event: any) => {
   isGettingLocation.value = true
-  selectedAddress.value = ""
 
   const response = await fetch(`  https://api.geoapify.com/v1/geocode/autocomplete?text=${event.detail.value}&format=json&apiKey=9fa2f9495b1a45bd8735bdd259500594`);
   const data = await response.json();
@@ -71,7 +70,6 @@ const searchForAddress = async (event: any) => {
   const addresses = [...data.results]
 
   isGettingLocation.value = false
-
   newAddress.value = addresses.map((address) => {
     return address.formatted
   })
@@ -98,7 +96,7 @@ const returnAddress = (address: string) => {
 
 <template>
   <section>
-    <ion-searchbar color="success" debounce="500" type="text" @ionChange="searchForAddress($event)">
+    <ion-searchbar color="success" debounce="700" type="text" v-model="selectedAddress" @ionChange="searchForAddress($event)">
       <ion-button class="location-button" color="danger" @click="getUserLocation">
         <ion-icon :icon="navigateCircle"></ion-icon>
       </ion-button>

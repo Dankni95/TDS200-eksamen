@@ -1,6 +1,5 @@
 <script lang="ts" setup xmlns:display="http://www.w3.org/1999/xhtml">
 
-
 import {INewAdvertisement, INewMapPoint} from '@/models/IAdvertisementResponse';
 import {directus} from '@/services/directus.service';
 import {Camera, CameraResultType} from '@capacitor/camera';
@@ -29,7 +28,7 @@ import {
   toastController
 } from '@ionic/vue';
 import {add, closeCircleOutline} from 'ionicons/icons';
-import {ref, toRaw} from 'vue';
+import {ref} from 'vue';
 import AdvertisementAddressInput from '@/components/AdvertisementAddressInput.vue'
 
 
@@ -50,7 +49,6 @@ const newAdvertisement = ref<INewAdvertisement>({
   address: ""
 });
 
-// Add whatever is in the hashtag input field to the camp spot's array of hashtags
 const addNewPlatformType = () => {
   // Avoid adding empty hashtags
   if (newPlatformTag.value) {
@@ -184,7 +182,6 @@ const conditionSelect = (selectValue: string) => {
 }
 
 
-
 </script>
 
 <template>
@@ -248,7 +245,10 @@ const conditionSelect = (selectValue: string) => {
         </ion-item>
 
         <ion-item lines="none">
-          <ion-chip v-for="platform in newAdvertisement.platform" :key="platform" color="primary">{{ platform }}</ion-chip>
+          <ion-chip v-for="platform in newAdvertisement.platform" :key="platform" color="primary">{{
+              platform
+            }}
+          </ion-chip>
         </ion-item>
 
         <ion-item>
@@ -269,7 +269,7 @@ const conditionSelect = (selectValue: string) => {
         <advertisement-address-input @my-event="getAddressFromChild"/>
 
 
-        <ion-button  :disabled="isUploadingAdvertisement" class="button-add" color="dark" fill="solid"
+        <ion-button :disabled="isUploadingAdvertisement" class="button-add" color="dark" fill="solid"
                     size="default" @click="postNewCampSpot">
           <ion-spinner v-if="isUploadingAdvertisement" name="dots"></ion-spinner>
           <span v-else>Publish advertisement 🏕</span>

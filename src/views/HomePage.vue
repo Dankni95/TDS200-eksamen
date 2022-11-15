@@ -5,17 +5,16 @@ import {authService, directus} from '@/services/directus.service';
 import {
   IonButton,
   IonButtons,
-  IonCard,
   IonContent,
   IonHeader,
   IonIcon,
+  IonLabel,
   IonPage,
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
   IonTitle,
   IonToolbar,
-    IonLabel,
   onIonViewDidEnter,
   RefresherCustomEvent
 } from '@ionic/vue';
@@ -23,6 +22,7 @@ import {ref} from 'vue';
 import {add, logIn, personOutline} from 'ionicons/icons';
 
 
+// state
 const advertisements = ref<IAdvertisement[]>([]);
 const currentUser = ref<any>();
 const isLoading = ref(true);
@@ -30,8 +30,8 @@ const userAccessToken = ref()
 
 
 onIonViewDidEnter(() => {
-   userAccessToken.value = localStorage.getItem('auth_token');
-    if (userAccessToken.value) getSignedInUser()
+  userAccessToken.value = localStorage.getItem('auth_token');
+  if (userAccessToken.value) getSignedInUser()
 
   fetchCampingSpots();
 })
@@ -81,32 +81,31 @@ const fetchCampingSpots = async () => {
 
 
 <template>
-  <ion-page :style="{backgroundImage:'url(assets/images/bg-1.jpg)'}"  >
+  <ion-page :style="{backgroundImage:'url(assets/images/bg-1.jpg)'}">
     <ion-header v-if="!isLoading" :translucent="true">
       <ion-toolbar>
         <ion-title>
-          <ion-title v-if="!isLoading"><ion-label text-wrap>Retro Games</ion-label></ion-title>
+          <ion-title v-if="!isLoading">
+            <ion-label text-wrap>Retro Games</ion-label>
+          </ion-title>
           <ion-spinner v-if="isLoading"/>
         </ion-title>
-
         <ion-buttons v-if="!userAccessToken" slot="end" router-link="/authentication">
-          <ion-button router-link="/new-advertisement">
+          <ion-button style="margin: 20px" router-link="/new-advertisement">
             <ion-icon :icon="logIn"></ion-icon>
-            <ion-label text-wrap>Log in</ion-label>
+            <ion-label text-wrap>Login</ion-label>
           </ion-button>
         </ion-buttons>
         <ion-buttons v-if="userAccessToken" slot="end">
           <ion-button router-link="/new-advertisement">
             <ion-icon :icon="add"></ion-icon>
-            <ion-label text-wrap>Publish add</ion-label>
+            <ion-label text-wrap>Publish ad</ion-label>
           </ion-button>
           <ion-button class="remove-image-preview" color="danger" router-link="/profile">
             <ion-icon :icon="personOutline"></ion-icon>
-            <ion-card>
-              <ion-label v-if="currentUser" text-wrap>
-                {{ currentUser.first_name }}
-              </ion-label>
-            </ion-card>
+            <ion-label v-if="currentUser" text-wrap>
+              {{ currentUser.first_name }}
+            </ion-label>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
@@ -118,9 +117,8 @@ const fetchCampingSpots = async () => {
         <ion-refresher-content></ion-refresher-content>
       </ion-refresher>
 
-
       <advertisement v-for="advertisement in advertisements" :key="advertisement.id"
-                         :advertisement="advertisement"/>
+                     :advertisement="advertisement"/>
     </ion-content>
   </ion-page>
 </template>
@@ -131,7 +129,7 @@ ion-content {
   display: flex;
 }
 
-ion-toolbar > ion-title{
+ion-toolbar > ion-title {
   padding: 10px;
 }
 
@@ -140,6 +138,5 @@ ion-header > * {
   height: 10vh;
 
 }
-
 
 </style>

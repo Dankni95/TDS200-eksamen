@@ -5,6 +5,7 @@ export interface IAdvertisement {
     description: string;
     condition: string;
     maps: INewMapPoint;
+    date_created: string
     images: {
         id: string;
     };
@@ -35,6 +36,14 @@ export interface INewMapPoint {
     formatted: string;
     coordinates: [number, number],
     type: string,
+}
+
+export interface ICurrentUser {
+    id: string
+    avatar: string
+    email: string
+    first_name: string
+    last_name: string
 }
 
 

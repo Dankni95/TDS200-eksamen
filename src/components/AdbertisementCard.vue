@@ -1,12 +1,5 @@
 <script lang="ts" setup>
-import {
-  IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
-  IonLabel
-} from "@ionic/vue";
+import {IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle, IonLabel} from "@ionic/vue";
 import AdvertisementImage from "@/components/AdvertisementImage.vue";
 
 
@@ -33,31 +26,31 @@ defineProps<Props>();
 
 <template>
   <ion-card :router-link="'/detail/' + advertisement.id">
-      <advertisement-image v-if="advertisement.images[0]" :image-id="advertisement.images[0].directus_files_id.id"/>
-        <ion-card-header>
-        <ion-card-title>
-            {{advertisement.title}}
-        </ion-card-title>
-          <ion-label color="primary" text-wrap>
-            Price: {{ advertisement.price }}
-          </ion-label>
-        <ion-card-subtitle>{{ advertisement.condition }}</ion-card-subtitle>
-
-      </ion-card-header>
-
-      <ion-card-content>
-        {{advertisement.description}}
-      </ion-card-content>
-    <ion-label style="color: blue;" text-wrap>ADDRESS:  </ion-label>
-    <ion-label text-wrap>
-        {{ advertisement.address }}
+    <advertisement-image v-if="advertisement.images[0]" :image-id="advertisement.images[0].directus_files_id.id"/>
+    <ion-card-header>
+      <ion-card-title>
+        {{ advertisement.title }}
+      </ion-card-title>
+      <ion-label color="primary" text-wrap>
+        Price: {{ advertisement.price }}
       </ion-label>
-    </ion-card>
+      <ion-card-subtitle>{{ advertisement.condition }}</ion-card-subtitle>
+
+    </ion-card-header>
+
+    <ion-card-content>
+      {{ advertisement.description }}
+    </ion-card-content>
+    <ion-label style="color: blue;" text-wrap>ADDRESS:</ion-label>
+    <ion-label text-wrap>
+      {{ advertisement.address }}
+    </ion-label>
+  </ion-card>
 
 </template>
 
 <style scoped>
-ion-card{
+ion-card {
   padding: 20px;
   color: #52ffe4;
   opacity: 0.9;

@@ -7,7 +7,6 @@ import {
   IonCard,
   IonCardContent,
   IonCardHeader,
-  IonCardSubtitle,
   IonCardTitle,
   IonContent,
   IonHeader,
@@ -23,10 +22,17 @@ import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 import {Camera, CameraResultType} from '@capacitor/camera';
 import Image from "@/components/AdvertisementImage.vue";
+import {ICurrentUser} from '@/models/IAdvertisementResponse';
 
+const userResponse = ref<ICurrentUser>({
+  id: "",
+  first_name: '',
+  last_name: '',
+  email: '',
+  avatar: ""
+});
 
 const router = useRouter();
-const currentUser = ref<object>();
 const isLoadingProfile = ref(true);
 
 
@@ -36,32 +42,35 @@ onIonViewDidEnter(() => {
 
 
 const getSignedInUser = async () => {
-  currentUser.value = await authService.currentUser()
+  userResponse.value = await authService.currentUser()
   isLoadingProfile.value = false
 }
-
+1
 const logout = async () => {
   await authService.logout()
+
+  const successToast = await toastController.create({
+    message: "You are now logged out!",
+    duration: 1500,
+    position: 'bottom',
+    color: 'success'
+  });
+
+  await successToast.present()
   await router.push({name: 'Home'})
+  localStorage.clear()
 }
 
 const isUploadingAvatar = ref(false);
 
-const newAvatar = ref({
-  image: currentUser.value?.avatar
-});
 
+// Handle data POST
+const postNewAvatar = async (webPath: string) => {
 
-// Handle data POSTing
-const postNewAvatar = async () => {
-  if (!newAvatar.value.image) {
-    alert("Du må laste opp bilde");
-    return;
-  }
 
   try {
     isUploadingAvatar.value = true;
-    const response = await fetch(newAvatar.value.image);
+    const response = await fetch(webPath);
     const imageBlob = await response.blob();
 
     const formData = new FormData();
@@ -73,8 +82,10 @@ const postNewAvatar = async () => {
         avatar: fileUpload.id
       });
 
+      userResponse.value.avatar = fileUpload.id
+
       const successToast = await toastController.create({
-        message: 'Profilbildet ble lastet opp!',
+        message: 'Avatar updated!',
         duration: 1500,
         position: 'bottom',
         color: 'success'
@@ -87,7 +98,7 @@ const postNewAvatar = async () => {
 
   } catch (error) {
     const errorToast = await toastController.create({
-      message: 'Noe gikk galt ved opplasting!',
+      message: 'Something went wrong while uploading!',
       duration: 2500,
       position: 'bottom',
       color: 'danger'
@@ -108,17 +119,14 @@ const triggerCamera = async () => {
   });
 
   if (photo.webPath) {
-    newAvatar.value.image = photo.webPath;
-    await postNewAvatar()
-    await getSignedInUser() // refresh
+    await postNewAvatar(photo.webPath)
   }
 }
 
 </script>
 
-
 <template>
-  <ion-page>
+  <ion-page :style="{backgroundImage:'url(assets/images/bg-1.jpg)'}">
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="start">
@@ -131,35 +139,36 @@ const triggerCamera = async () => {
       </ion-toolbar>
     </ion-header>
 
-    <ion-content v-if="currentUser && !isLoadingProfile" :fullscreen="true">
+    <ion-content v-if="userResponse && !isLoadingProfile" :fullscreen="true">
 
 
-      <ion-card v-if="currentUser">
-        <IonThumbnail v-if="currentUser.avatar" v-model="currentUser">
-          <Image :image-id="currentUser.avatar"/>
+      <ion-card v-if="userResponse">
+        <IonThumbnail v-if="userResponse.avatar" v-model="userResponse">
+          <Image :image-id="userResponse.avatar"/>
         </IonThumbnail>
-        <IonThumbnail v-if="!currentUser.avatar">
+        <IonThumbnail v-if="!userResponse.avatar">
           <img alt="avatar" src="assets/images/placeholder.jpg"/>
         </IonThumbnail>
         <ion-card-header>
-          <ion-card-title>{{ currentUser.first_name + " " + currentUser.last_name }}</ion-card-title>
+          <ion-card-title>{{ userResponse.first_name }} {{ userResponse.last_name }}</ion-card-title>
         </ion-card-header>
 
-        <ion-card-content>
-          {{ currentUser.email }}
+        <ion-card-content style="color: yellow">
+          {{ userResponse.email }}
         </ion-card-content>
 
-        <ion-button fill="outline" @click="triggerCamera">Upload avatar image</ion-button>
-        <ion-button fill="outline" @click="logout">Logout</ion-button>
       </ion-card>
-
+      <div style=" text-align: center;">
+        <ion-button color="secondary" fill="solid" @click="triggerCamera">Upload avatar image</ion-button>
+        <ion-button color="secondary" fill="solid" @click="logout">Logout</ion-button>
+      </div>
     </ion-content>
   </ion-page>
 </template>
 
 <style scoped>
 ion-content {
-
+  --ion-background-color: transparent;
   display: flex;
 }
 
@@ -167,12 +176,20 @@ ion-header > * {
   display: flex;
   height: 10vh;
 
+
+}
+
+ion-card {
+  background-color: purple;
+  opacity: 0.8;
+  border-radius: 300px;
 }
 
 ion-card > * {
   display: block;
   text-align: center;
   margin: 0 auto;
+
 }
 
 ion-card-title {
@@ -184,10 +201,6 @@ ion-thumbnail {
   margin-top: 5%;
   margin-left: auto;
   margin-right: auto;
-}
-
-ion-card-subtitle {
-  --color: #d1fff8;
 }
 
 /* iOS places the subtitle above the title */

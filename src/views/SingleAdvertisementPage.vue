@@ -3,21 +3,23 @@
 import AdvertisementImage from "@/components/AdvertisementImage.vue";
 import {IAdvertisement, IAdvertisementResponse} from "@/models/IAdvertisementResponse";
 import {directus} from "@/services/directus.service";
+import {ref} from 'vue';
+import {useRoute} from 'vue-router';
+import {MapboxMap, MapboxMarker} from '@studiometa/vue-mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import {
   IonBackButton,
-  IonButton,
   IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
   IonCardSubtitle,
   IonCardTitle,
+  IonChip,
   IonCol,
   IonContent,
   IonHeader,
-  IonIcon,
   IonLabel,
-  IonList,
   IonPage,
   IonRow,
   IonSpinner,
@@ -25,11 +27,6 @@ import {
   IonToolbar,
   onIonViewDidEnter
 } from "@ionic/vue";
-import {chatboxOutline} from 'ionicons/icons';
-import {ref} from 'vue';
-import {useRoute} from 'vue-router';
-import {MapboxMap, MapboxMarker} from '@studiometa/vue-mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
 
 /* Using the route object, we can get data for the user's current route */
@@ -41,7 +38,6 @@ const map = ref();
 const {id} = route.params;
 
 /* State */
-const isModalOpen = ref(false);
 const isLoadingAdvertisement = ref(true);
 
 /* "Dummy data" for displaying in the UI until we connect the app to an API */
@@ -87,19 +83,12 @@ const fetchCampingSpot = async () => {
     advertisement.value = response.data.images_by_id;
     console.log(response.data.images_by_id)
     isLoadingAdvertisement.value = false;
+
+    var isoDateString = new Date(advertisement.value.date_created);
+    advertisement.value.date_created = isoDateString.toLocaleDateString("nb-no");
   }
 }
 
-const addNewComment = () => {
-  /* campingSpot.value.comments.unshift({
-    id: 2,
-    username: "N/A",
-    text: newCommentText.value
-  });
-
-  isModalOpen.value = false;
-  newCommentText.value = ''; */
-}
 
 //https://vue-mapbox-gl.studiometa.dev/guide/usage/
 
@@ -117,11 +106,6 @@ const addNewComment = () => {
           <ion-spinner></ion-spinner>
         </ion-title>
         <ion-title v-if="advertisement">{{ advertisement.title }} ({{ id }})</ion-title>
-        <ion-buttons slot="end">
-          <ion-button @click="isModalOpen = true">
-            <ion-icon :icon="chatboxOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -133,6 +117,17 @@ const addNewComment = () => {
 
       <!-- Camping spot info section -->
       <ion-card>
+        <br>
+        <ion-label style="text-align: center">
+          <p style="text-align: center"> Created by {{ advertisement.user_created.first_name }}
+            {{ advertisement.user_created.last_name }} on
+            {{ advertisement.date_created }}</p>
+        </ion-label>
+        <ion-item>
+          <ion-chip v-for="platform in JSON.parse(advertisement.platform)" :key="platform" color="primary">
+            {{ platform }}
+          </ion-chip>
+        </ion-item>
         <ion-card-title style="text-align: center; padding: 50px">
           <h2>{{ advertisement.title }}</h2>
         </ion-card-title>
@@ -146,6 +141,7 @@ const addNewComment = () => {
             </ion-row>
           </ion-grid>
         </section>
+
         <ion-card-header style="color: #52ffe4">
           Price: {{ advertisement.price }}
           <br>
